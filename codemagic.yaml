@@ -75,3 +75,39 @@ workflows:
           success: true
           failure: false
 
+  ios_adhoc_manual:
+    name: iOS AdHoc (manual signing, no API key)
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      vars:
+        BUNDLE_ID: com.applixus.etkinlikBul
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install manual signing files
+        script: |
+          # Upload your .p12 and .mobileprovision in Codemagic UI → Code signing
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Flutter clean & pub get
+        script: |
+          flutter clean
+          flutter pub get
+      - name: Build IPA (Ad Hoc manual)
+        script: |
+          flutter build ipa --release --export-method ad-hoc
+    artifacts:
+      - "**/*.ipa"
+      - "**/xcarchive/**"
+      - "**/dSYM.zip"
+    publishing:
+      email:
+        recipients:
+          - $CM_EMAIL
+        notify:
+          success: true
+          failure: false
+
